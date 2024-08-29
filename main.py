@@ -2,7 +2,10 @@ import os
 from dotenv import load_dotenv
 from discord import Intents, Client, Message
 from responses import get_response
+import logging as logger
 
+
+logger.basicConfig(filename="magic.log", level=logger.INFO)
 #Load token
 load_dotenv()
 TOKEN = os.getenv("DISCORD_TOKEN")
@@ -13,17 +16,17 @@ intents.message_content = True
 client = Client(intents=intents)
 
 #Message func
-async def send_message(message,user_message,username):
+async def send_message(message,user_message,username,logger):
     if not user_message:
         print("no hay mensage porque probablemente no hay intents")
         return
     is_private = user_message[0] == "?"
-
+    
     if is_private:
         user_message = user_message[1:]
-
+    
     try:
-        response= get_response(user_message,username)
+        response= get_response(user_message,username,logger)
         await message.author.send(response) if is_private else await message.channel.send(response)
 
     except Exception as ex:
@@ -45,7 +48,7 @@ async def on_message(message):
 
     print(f"{channel}, {username}:{user_message}")
 
-    await send_message(message, user_message, username)
+    await send_message(message, user_message, username,logger)
 
 # def main
 def main():

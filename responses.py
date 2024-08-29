@@ -19,13 +19,13 @@ def get_response(user_input,user,logger):
         return f"deja de hacerte el boludo {user}"
     elif "encontrame:" in lowered:
         lowered = lowered.replace("encontrame:", "")
-        return get_cards_pirulo(lowered,logger)
+        return f"Resultado Pirulo: \n {get_cards_pirulo(lowered,logger)}\n Resultado Lair:\n{get_cards_lair(lowered,logger)}\n"
 
 
 
 def get_cards_pirulo(input,logger):
     
-    url = f"https://www.magiclair.com.ar/search?q={input}"
+    url = f"https://www.mtgpirulo.com/products/search?q={input}"
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
     }
@@ -36,30 +36,34 @@ def get_cards_pirulo(input,logger):
         soup = BeautifulSoup(response.text, 'html.parser')
          #Aquí deberás identificar la estructura de la página HTML y extraer los datos
         card_list=[]
-        logger.info(soup)
-        # for item in soup.find_all('div', class_='productCard__card'):
-        #     no_stock = item.find("div", class_="productCard__button productCard__button--outOfStock" )
-        #     if no_stock:
-        #       continue   
-        #     titulo = item.find('p', class_='productCard__setName').text.strip()
-        #     precio = item.find('p', class_='productCard__price').text.strip()
+        #logger.info(soup)
+        for item in soup.find_all('div', class_="variant-row in-stock"): 
+            form = item.find('form', class_='add-to-cart-form')
+
+            
+            data_name = form.get('data-name')
+            data_category = form.get('data-category')
+            data_price = form.get('data-price')
+            data_variant = form.get('data-variant')
     
-        #     card_list.append({
-        #         'titulo': input + "-" +titulo,
-        #         'precio': precio,
-        #     })
-        # logger.info(card_list)
+            card_list.append({
+                'titulo': data_name,
+                "variante":data_category + "-" + data_variant,
+                'precio': data_price
+            })
+        logger.info(card_list)
 
-        # formatted_list = []
-        # for i in range(0, len(card_list), 2):
-        #     titulo = card_list[i+1].get('titulo', '')
-        #     precio = card_list[i+1].get('precio', '')
-        #     formatted_list.append(f"{titulo} // {precio}")
+        formatted_list = []
+        for card in card_list:
+            titulo = card.get('titulo', '')
+            variante = card.get('variante', '')
+            precio = card.get('precio', '')
+            formatted_list.append(f"{titulo}// {variante} // {precio} dolarucos")
 
-        # # Join the formatted items into a single string (optional)
-        # formatted_string = "\n".join(formatted_list)    
+        # Join the formatted items into a single string (optional)
+        formatted_string = "\n".join(formatted_list)    
         # return formatted_string if formatted_string else "No hay resultados con stock En pirulo"
-        return "todavia no termine con esto"
+        return formatted_string if formatted_string else "No hay resultados con stock En pirulo"
     else:
         print(f"Error en la solicitud: {response.status_code}")
         return None
@@ -80,12 +84,18 @@ def get_cards_lair(input,logger,stock=False):
         card_list=[]
         logger.info(soup)
         for item in soup.find_all('div', class_='productCard__card'):
+            
             no_stock = item.find("div", class_="productCard__button productCard__button--outOfStock" )
-            if no_stock:
-              continue   
+            product_type = item.get("data-producttype")
+            logger.error(product_type)
+            if no_stock or product_type != "MTG Single":
+                continue
+
             titulo = item.find('p', class_='productCard__setName').text.strip()
             precio = item.find('p', class_='productCard__price').text.strip()
-    
+   
+            logger.error(titulo)
+            logger.error(precio)
             card_list.append({
                 'titulo': input + "-" +titulo,
                 'precio': precio,
@@ -93,9 +103,9 @@ def get_cards_lair(input,logger,stock=False):
         logger.info(card_list)
 
         formatted_list = []
-        for i in range(0, len(card_list), 2):
-            titulo = card_list[i+1].get('titulo', '')
-            precio = card_list[i+1].get('precio', '')
+        for card in card_list:
+            titulo = card.get('titulo', '')
+            precio = card.get('precio', '')
             formatted_list.append(f"{titulo} // {precio}")
 
         # Join the formatted items into a single string (optional)

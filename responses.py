@@ -19,11 +19,11 @@ def get_response(user_input,user,logger):
     elif lowered == "tuki":
         return f"deja de hacerte el boludo {user}"
     elif "help" in lowered:
-        return f"Para Buscar una carta: \n!encontrame tucarta \n Para que la respuesta sea privada:\n ?encontrame tucarta"
+        return f"Para Buscar una carta: \n!encontrame tucarta \n Para que la respuesta sea privada:\n?encontrame tucarta"
     elif "encontrame" in lowered:
         lowered = lowered.replace("encontrame", "")
         lowered = lowered.strip()
-        return f"----Pirulo: \n {get_cards_pirulo(lowered,logger)}\n ----Lair:\n{get_cards_lair(lowered,logger)}\n ----Dealers:\n {get_cards_dealers(lowered,logger)}\n ----Batikueva:\n {get_cards_batikueva(lowered,logger)}"
+        return f"\nBuscaste:{lowered}\n----Pirulo: \n{get_cards_pirulo(lowered,logger)}\n ----Lair:\n{get_cards_lair(lowered,logger)}\n ----Dealers:\n{get_cards_dealers(lowered,logger)}\n ----Batikueva:\n{get_cards_batikueva(lowered,logger)}"
         
 def get_cards_batikueva(input,logger):
     

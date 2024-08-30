@@ -1,6 +1,7 @@
 import requests
 import bot_config
 import json
+import re
 from bs4 import BeautifulSoup
 
 
@@ -214,14 +215,16 @@ def get_cards_lair(input,logger):
             logger.error(product_type)
             if no_stock or product_type != "MTG Single":
                 continue
-
-            titulo = item.find('p', class_='productCard__setName').text.strip()
+            img_tag = item.find('img', class_='productCard__img')
+            alt_text = img_tag['alt'] if img_tag else None
+            cleaned_text = re.sub(r'\s*\[.*?\]', '', alt_text)
+            if cleaned_text.lower() != input:
+                continue
+            #titulo = item.find('p', class_='productCard__setName').text.strip()
             precio = item.find('p', class_='productCard__price').text.strip()
    
-            logger.error(titulo)
-            logger.error(precio)
             card_list.append({
-                'titulo': input + "-" +titulo,
+                'titulo': alt_text,
                 'precio': precio,
             })
         logger.info(card_list)

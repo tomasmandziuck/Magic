@@ -3,6 +3,7 @@ from dotenv import load_dotenv
 from discord import Intents, Client, Message
 from responses import get_response
 import logging as logger
+import bot_config
 
 
 logger.basicConfig(filename="magic.log", level=logger.INFO)
@@ -24,7 +25,7 @@ async def send_message(message,user_message,username,logger):
     
     if is_private:
         user_message = user_message[1:]
-    if username.lower() == "agusproche":
+    if username.lower() == bot_config.ENEMY_USER:
         await message.author.send("Se requiere autorizacion del propietario para habilitar servicio")
         return
     

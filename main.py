@@ -22,16 +22,21 @@ async def send_message(message,user_message,username,logger):
         print("no hay mensage porque probablemente no hay intents")
         return
     is_private = user_message[0] == "?"
-    
-    if is_private:
-        user_message = user_message[1:]
+    is_general= user_message[0] == "!"
+    user_message = user_message[1:]
+
     if username.lower() == bot_config.ENEMY_USER:
         await message.author.send("Se requiere autorizacion del propietario para habilitar servicio")
         return
     
     try:
         response= get_response(user_message,username,logger)
-        await message.author.send(response) if is_private else await message.channel.send(response)
+        #await message.author.send(response) if is_private else await message.channel.send(response)
+        if is_private:
+            await message.author.send(response)
+        elif is_general:
+            await message.channel.send(response)
+
 
     except Exception as ex:
         print(ex)

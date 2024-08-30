@@ -1,5 +1,6 @@
 import requests
 import bot_config
+import json
 from bs4 import BeautifulSoup
 
 
@@ -19,9 +20,64 @@ def get_response(user_input,user,logger):
         return f"deja de hacerte el boludo {user}"
     elif "encontrame:" in lowered:
         lowered = lowered.replace("encontrame:", "")
-        return f"Pirulo: \n {get_cards_pirulo(lowered,logger)}\n Lair:\n{get_cards_lair(lowered,logger)}\n Dealers:\n {get_cards_dealers(lowered,logger)}"
+        lowered = lowered.strip()
+        return f"----Pirulo: \n {get_cards_pirulo(lowered,logger)}\n ----Lair:\n{get_cards_lair(lowered,logger)}\n ----Dealers:\n {get_cards_dealers(lowered,logger)}\n ----Batikueva:\n {get_cards_batikueva(lowered,logger)}"
+    else:
+        return "Dale pegale a las teclas amigo"
         
+def get_cards_batikueva(input,logger):
+    
+    url = f"https://www.labatikuevastore.com/search/?q={input}"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
+    }
+    
+    response = requests.get(url, headers=headers)
+    
+    if response.status_code == 200:
+        soup = BeautifulSoup(response.text, 'html.parser')
+         #Aquí deberás identificar la estructura de la página HTML y extraer los datos
+        card_list=[]
+        logger.info(soup)
+        for item in soup.find_all('div', class_="js-product-container js-quickshop-container position-relative js-quickshop-has-variants"): 
+            #aria-label
+            data_variants = item.get('data-variants')
+            variants_list = json.loads(data_variants)
+            img_tag = item.find('img', class_='js-item-image')
+            titulo = img_tag.get('alt')
+            logger.info(titulo)
+            if str(titulo).lower() != input:
+                continue
+            for variant in variants_list:
+                if int(variant.get('stock')) != 0:
+                    card_list.append({
+                        'titulo': titulo,
+                        "variante":variant.get('option2'),
+                        'precio': variant.get('price_short')
+                    })
+        logger.info(card_list)
 
+        formatted_list = []
+        for i, card in enumerate(card_list):
+            if i >= 6:  
+                break
+            titulo = card.get('titulo', '')
+            variante = card.get('variante', '')
+            precio = card.get('precio', '')
+            formatted_list.append(f"{titulo}// {variante} // {precio} pesitos crocantes")
+
+        if len(card_list) < 6:
+            extra= "\n----------------Disfrute-----------------"
+        else:    
+            extra = "\n---------Hay mas pero hay limite de caracteres-----------"
+
+        # Join the formatted items into a single string (optional)
+        formatted_string = "\n".join(formatted_list)    
+        return formatted_string +f"{extra}" if formatted_string else "No hay resultados con stock En Batikueva"
+    else:
+        print(f"Error en la solicitud: {response.status_code}")
+        return None
+    
 def get_cards_dealers(input,logger):
     
     url = f"https://www.magicdealersstore.com/products/search?q={input}"
@@ -43,6 +99,10 @@ def get_cards_dealers(input,logger):
 
             
             data_name = form.get('data-name')
+            logger.info(input)
+            logger.info(str(data_name).lower())
+            if str(data_name).lower() != input:
+                continue
             data_category = form.get('data-category')
             data_price = form.get('data-price')
             data_variant = form.get('data-variant')
@@ -64,9 +124,9 @@ def get_cards_dealers(input,logger):
             formatted_list.append(f"{titulo}// {variante} // {precio} Patacones")
 
         if len(card_list) < 6:
-            extra= "\nDisfrute"
+            extra= "\n----------------Disfrute-----------------"
         else:    
-            extra = "\nHay mas pero hay limite de caracteres"
+            extra = "\n---------Hay mas pero hay limite de caracteres-----------"
 
         # Join the formatted items into a single string (optional)
         formatted_string = "\n".join(formatted_list)    
@@ -95,6 +155,10 @@ def get_cards_pirulo(input,logger):
 
             
             data_name = form.get('data-name')
+            logger.info(input)
+            logger.info(str(data_name).lower())
+            if str(data_name).lower() != input:
+                continue
             data_category = form.get('data-category')
             data_price = form.get('data-price')
             data_variant = form.get('data-variant')
@@ -116,9 +180,9 @@ def get_cards_pirulo(input,logger):
             formatted_list.append(f"{titulo}// {variante} // {precio} dolarucos")
 
         if len(card_list) < 6:
-            extra= "\nDisfrute"
+            extra= "\n----------------Disfrute-----------------"
         else:    
-            extra = "\nHay mas pero hay limite de caracteres"    
+            extra = "\n---------Hay mas pero hay limite de caracteres-----------"    
 
         # Join the formatted items into a single string (optional)
         formatted_string = "\n".join(formatted_list)    
@@ -129,7 +193,7 @@ def get_cards_pirulo(input,logger):
         return None
     
 
-def get_cards_lair(input,logger,stock=False):
+def get_cards_lair(input,logger):
     
     url = f"https://www.magiclair.com.ar/search?q={input}"
     headers = {
@@ -142,7 +206,7 @@ def get_cards_lair(input,logger,stock=False):
         soup = BeautifulSoup(response.text, 'html.parser')
          #Aquí deberás identificar la estructura de la página HTML y extraer los datos
         card_list=[]
-        logger.info(soup)
+        #logger.info(soup)
         for item in soup.find_all('div', class_='productCard__card'):
             
             no_stock = item.find("div", class_="productCard__button productCard__button--outOfStock" )
@@ -171,9 +235,9 @@ def get_cards_lair(input,logger,stock=False):
             formatted_list.append(f"{titulo} // {precio}")
 
         if len(card_list) < 6:
-            extra= "\nDisfrute"
+            extra= "\n----------------Disfrute-----------------"
         else:    
-            extra = "\nHay mas pero hay limite de caracteres"    
+            extra = "\n---------Hay mas pero hay limite de caracteres-----------"    
 
         # Join the formatted items into a single string (optional)
         formatted_string = "\n".join(formatted_list)    

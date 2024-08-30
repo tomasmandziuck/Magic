@@ -24,6 +24,9 @@ async def send_message(message,user_message,username,logger):
     
     if is_private:
         user_message = user_message[1:]
+    if username.lower() == "agusproche":
+        await message.author.send("Se requiere autorizacion del propietario para habilitar servicio")
+        return
     
     try:
         response= get_response(user_message,username,logger)

@@ -39,7 +39,7 @@ def get_cards_batikueva(input,logger):
         soup = BeautifulSoup(response.text, 'html.parser')
          #Aquí deberás identificar la estructura de la página HTML y extraer los datos
         card_list=[]
-        logger.info(soup)
+        #logger.info(soup)
         for item in soup.find_all('div', class_="js-product-container js-quickshop-container position-relative js-quickshop-has-variants"): 
             #aria-label
             data_variants = item.get('data-variants')
@@ -212,7 +212,7 @@ def get_cards_lair(input,logger):
             
             no_stock = item.find("div", class_="productCard__button productCard__button--outOfStock" )
             product_type = item.get("data-producttype")
-            logger.error(product_type)
+            #logger.error(product_type)
             if no_stock or product_type != "MTG Single":
                 continue
             img_tag = item.find('img', class_='productCard__img')

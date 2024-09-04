@@ -7,31 +7,20 @@ from bs4 import BeautifulSoup
 
 def get_response(user_input,user,logger):
     lowered = user_input.lower()
-    if lowered == "test":
-        return f"Hey im a bot made for suffering {user}"
-    elif lowered == "test noe":
-        return "te amo mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho mucho"
-    elif lowered == "test rodri":
-        return f"El bosque te espera {user}"
-    elif lowered == "test roo":
-        return f"No me olvide de vos tampoco {user}"
-    elif lowered == "soy un puto genio":
-        return f"No te la creas tanto {user}"
-    elif lowered == "tuki":
-        return f"deja de hacerte el boludo {user}"
+    if lowered in bot_config.CUSTOM_RESPONSES:
+        return bot_config.CUSTOM_RESPONSES[lowered].format(user)
     elif "help" in lowered:
-        return f"Para Buscar una carta: \n!encontrame tucarta \n Para que la respuesta sea privada:\n?encontrame tucarta"
-    elif "encontrame" in lowered:
-        lowered = lowered.replace("encontrame", "")
-        lowered = lowered.strip()
-        return f"\nBuscaste:{lowered}\n----Pirulo: \n{get_cards_pirulo(lowered,logger)}\n ----Lair:\n{get_cards_lair(lowered,logger)}\n ----Dealers:\n{get_cards_dealers(lowered,logger)}\n ----Batikueva:\n{get_cards_batikueva(lowered,logger)}"
+        return f"Para Buscar una carta: \n!find tucarta \n Para que la respuesta sea privada:\n?find tucarta"
+    elif "find" in lowered:
+        lowered = lowered.replace("find", "").strip()
+        return f"\nBuscaste: {lowered}\n----Pirulo:\n{get_cards_pirulo(lowered,logger)}\n ----Lair:\n{get_cards_lair(lowered,logger)}\n ----Dealers:\n{get_cards_dealers(lowered,logger)}\n ----Batikueva:\n{get_cards_batikueva(lowered,logger)}"
+    else:
+        return "No estoy seguro que quisiste escribir"    
         
 def get_cards_batikueva(input,logger):
     
-    url = f"https://www.labatikuevastore.com/search/?q={input}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
-    }
+    url = bot_config.STORE_URL["batikueva"].format(input)
+    headers = bot_config.HEADERS
     
     response = requests.get(url, headers=headers)
     
@@ -41,7 +30,7 @@ def get_cards_batikueva(input,logger):
         card_list=[]
         #logger.info(soup)
         for item in soup.find_all('div', class_="js-product-container js-quickshop-container position-relative js-quickshop-has-variants"): 
-            #aria-label
+            
             data_variants = item.get('data-variants')
             variants_list = json.loads(data_variants)
             img_tag = item.find('img', class_='js-item-image')
@@ -58,33 +47,17 @@ def get_cards_batikueva(input,logger):
                     })
         logger.info(card_list)
 
-        formatted_list = []
-        for i, card in enumerate(card_list):
-            if i >= 6:  
-                break
-            titulo = card.get('titulo', '')
-            variante = card.get('variante', '')
-            precio = card.get('precio', '')
-            formatted_list.append(f"{titulo}// {variante} // {precio} pesitos crocantes")
+        formatted_string = format_list(card_list)
 
-        if len(card_list) < 6:
-            extra= "\n----------------Disfrute-----------------"
-        else:    
-            extra = "\n---------Hay mas pero hay limite de caracteres-----------"
-
-        # Join the formatted items into a single string (optional)
-        formatted_string = "\n".join(formatted_list)    
-        return formatted_string +f"{extra}" if formatted_string else "No hay resultados con stock En Batikueva"
+        return formatted_string if formatted_string else "No hay resultados con stock En Batikueva"
     else:
         print(f"Error en la solicitud: {response.status_code}")
         return None
     
 def get_cards_dealers(input,logger):
     
-    url = f"https://www.magicdealersstore.com/products/search?q={input}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
-    }
+    url = bot_config.STORE_URL["dealers"].format(input)
+    headers = bot_config.HEADERS
     
     response = requests.get(url, headers=headers)
     
@@ -115,34 +88,17 @@ def get_cards_dealers(input,logger):
             })
         logger.info(card_list)
 
-        formatted_list = []
-        for i, card in enumerate(card_list):
-            if i >= 6:  
-                break
-            titulo = card.get('titulo', '')
-            variante = card.get('variante', '')
-            precio = card.get('precio', '')
-            formatted_list.append(f"{titulo}// {variante} // {precio} Patacones")
+        formatted_string = format_list(card_list)
 
-        if len(card_list) < 6:
-            extra= "\n----------------Disfrute-----------------"
-        else:    
-            extra = "\n---------Hay mas pero hay limite de caracteres-----------"
-
-        # Join the formatted items into a single string (optional)
-        formatted_string = "\n".join(formatted_list)    
-        # return formatted_string if formatted_string else "No hay resultados con stock En pirulo"
-        return formatted_string +f"{extra}" if formatted_string else "No hay resultados con stock En Dealers"
+        return formatted_string if formatted_string else "No hay resultados con stock En Dealers"
     else:
         print(f"Error en la solicitud: {response.status_code}")
         return None
 
 def get_cards_pirulo(input,logger):
     
-    url = f"https://www.mtgpirulo.com/products/search?q={input}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
-    }
+    url = bot_config.STORE_URL["pirulo"].format(input)
+    headers = bot_config.HEADERS
     
     response = requests.get(url, headers=headers)
     
@@ -171,24 +127,9 @@ def get_cards_pirulo(input,logger):
             })
         logger.info(card_list)
 
-        formatted_list = []
-        for i, card in enumerate(card_list):
-            if i >= 6:  
-                break
-            titulo = card.get('titulo', '')
-            variante = card.get('variante', '')
-            precio = card.get('precio', '')
-            formatted_list.append(f"{titulo}// {variante} // {precio} dolarucos")
+        formatted_string = format_list(card_list)
 
-        if len(card_list) < 6:
-            extra= "\n----------------Disfrute-----------------"
-        else:    
-            extra = "\n---------Hay mas pero hay limite de caracteres-----------"    
-
-        # Join the formatted items into a single string (optional)
-        formatted_string = "\n".join(formatted_list)    
-        # return formatted_string if formatted_string else "No hay resultados con stock En pirulo"
-        return formatted_string +f"{extra}" if formatted_string else "No hay resultados con stock En pirulo"
+        return formatted_string if formatted_string else "No hay resultados con stock En pirulo"
     else:
         print(f"Error en la solicitud: {response.status_code}")
         return None
@@ -196,10 +137,8 @@ def get_cards_pirulo(input,logger):
 
 def get_cards_lair(input,logger):
     
-    url = f"https://www.magiclair.com.ar/search?q={input}"
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/85.0.4183.121 Safari/537.36"
-    }
+    url = bot_config.STORE_URL["lair"].format(input)
+    headers = bot_config.HEADERS
     
     response = requests.get(url, headers=headers)
     
@@ -229,22 +168,29 @@ def get_cards_lair(input,logger):
             })
         logger.info(card_list)
 
-        formatted_list = []
-        for i, card in enumerate(card_list):
-            if i >= 6:  
-                break
+        formatted_string = format_list(card_list,store="lair")
+
+        return formatted_string if formatted_string else "No hay resultados con stock En lair"
+    else:
+        print(f"Error en la solicitud: {response.status_code}")
+        return None
+
+def format_list(card_list,store=None):
+    formatted_list = []
+    if not card_list:
+        return "No hay resultados con stock"
+    for i, card in enumerate(card_list[:6]):
+        titulo = card.get('titulo', '')
+        precio = card.get('precio', '')
+        if store == "lair":
             titulo = card.get('titulo', '')
             precio = card.get('precio', '')
             formatted_list.append(f"{titulo} // {precio}")
+        else:
+            variante = card.get('variante', '')
+            formatted_list.append(f"{titulo}// {variante} // {precio}")    
 
-        if len(card_list) < 6:
-            extra= "\n----------------Disfrute-----------------"
-        else:    
-            extra = "\n---------Hay mas pero hay limite de caracteres-----------"    
+    extra= "\n----------------Disfrute-----------------" if len(card_list) < 6 else "\n---------Hay mas pero hay limite de caracteres-----------"   
 
-        # Join the formatted items into a single string (optional)
-        formatted_string = "\n".join(formatted_list)    
-        return formatted_string +f"{extra}" if formatted_string else "No hay resultados con stock En lair"
-    else:
-        print(f"Error en la solicitud: {response.status_code}")
-        return None        
+    formatted_string = "\n".join(formatted_list)+f"{extra}"    
+    return formatted_string        

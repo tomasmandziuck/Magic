@@ -30,12 +30,13 @@ async def send_message(message,user_message,username,logger):
         return
     
     try:
-        response= get_response(user_message,username,logger)
+        responses= get_response(user_message,username,logger)
         #await message.author.send(response) if is_private else await message.channel.send(response)
-        if is_private:
-            await message.author.send(response)
-        elif is_general:
-            await message.channel.send(response)
+        for response in responses:
+            if is_private:
+                await message.author.send(response)
+            elif is_general:
+                await message.channel.send(response)
 
 
     except Exception as ex:

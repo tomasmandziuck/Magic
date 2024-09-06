@@ -7,13 +7,16 @@ from bs4 import BeautifulSoup
 
 def get_response(user_input,user,logger):
     lowered = user_input.lower()
+    responses= []
     if lowered in bot_config.CUSTOM_RESPONSES:
-        return bot_config.CUSTOM_RESPONSES[lowered].format(user)
+        responses.append(bot_config.CUSTOM_RESPONSES[lowered].format(user))
+        return responses
     elif "help" in lowered:
-        return f"Para Buscar una carta: \n!find tucarta \n Para que la respuesta sea privada:\n?find tucarta"
+        responses.append(f"Para Buscar una carta: \n!find tucarta \n Para que la respuesta sea privada:\n?find tucarta")
+        return responses
     elif "find" in lowered:
         lowered = lowered.replace("find", "").strip()
-        responses=[f"Pediste: {lowered}\n",]
+        responses.append(f"Pediste: {lowered}\n")
         responses = get_cards_pirulo(lowered,responses,logger)
         logger.info(responses)
         responses = get_cards_lair(lowered,responses,logger)
@@ -25,7 +28,8 @@ def get_response(user_input,user,logger):
         #return f"\nBuscaste: {lowered}\n----Pirulo:\n{get_cards_pirulo(lowered,responses,logger)}\n ----Lair:\n{get_cards_lair(lowered,responses,logger)}\n ----Dealers:\n{get_cards_dealers(lowered,responses,logger)}\n ----Batikueva:\n{get_cards_batikueva(lowered,responses,logger)}"
         return responses
     else:
-        return "No estoy seguro que quisiste escribir"    
+        responses.append("Pegale a las teclas manco")
+        return responses     
         
 def get_cards_batikueva(input,responses,logger):
     logger.info(type(responses))

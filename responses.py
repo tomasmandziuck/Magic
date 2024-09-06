@@ -210,7 +210,7 @@ def get_cards_lair(input,responses,logger):
 def format_list(card_list,store=None):
     formatted_list = []
     if not card_list:
-        return "No hay resultados con stock"
+        return f"{store}:\nNo hay resultados con stock"
     for i, card in enumerate(card_list[:6]):
         titulo = card.get('titulo', '')
         precio = card.get('precio', '')

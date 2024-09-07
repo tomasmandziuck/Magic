@@ -12,7 +12,7 @@ def get_response(user_input,user,logger):
         responses.append(bot_config.CUSTOM_RESPONSES[lowered].format(user))
         return responses
     elif "help" in lowered:
-        responses.append(f"Para Buscar una carta: \n!find tucarta \n Para que la respuesta sea privada:\n?find tucarta")
+        responses.append(f"Para Buscar una carta:\n!find tucarta\nPara que la respuesta sea privada:\n?find tucarta")
         return responses
     elif "find" in lowered:
         lowered = lowered.replace("find", "").strip()
@@ -25,10 +25,9 @@ def get_response(user_input,user,logger):
         logger.info(responses)
         responses = get_cards_batikueva(lowered,responses,logger)
         logger.info(responses)
-        #return f"\nBuscaste: {lowered}\n----Pirulo:\n{get_cards_pirulo(lowered,responses,logger)}\n ----Lair:\n{get_cards_lair(lowered,responses,logger)}\n ----Dealers:\n{get_cards_dealers(lowered,responses,logger)}\n ----Batikueva:\n{get_cards_batikueva(lowered,responses,logger)}"
         return responses
     else:
-        responses.append("Pegale a las teclas manco")
+        responses.append("Pegale a las teclas capoeira")
         return responses     
         
 def get_cards_batikueva(input,responses,logger):
@@ -51,8 +50,8 @@ def get_cards_batikueva(input,responses,logger):
             titulo = img_tag.get('alt')
             a_tag = soup.find('a', {'aria-label': titulo})
             link = a_tag['href']
-            #logger.info(titulo)
-            if str(titulo).lower() != input:
+
+            if not input in str(titulo).lower():
                 continue
             for variant in variants_list:
                 if int(variant.get('stock')) != 0:
@@ -66,7 +65,7 @@ def get_cards_batikueva(input,responses,logger):
 
         formatted_string = format_list(card_list,"Batikueva")
         
-        responses.append(formatted_string) if formatted_string else responses.append("No hay resultados con stock En batikueva")
+        responses.append(formatted_string) 
         
         return responses
     else:
@@ -87,15 +86,11 @@ def get_cards_dealers(input,responses,logger):
         #logger.info(soup)
         for item in soup.find_all('div', class_="meta"):
             if item.find('div', class_="variant-row in-stock"):
-                #if item.find("div",class_="product-price"):
-                 #   logger.warning(item.find("div",class_="product-price"))
                 form = item.find('form', class_='add-to-cart-form')
 
-                
                 data_name = form.get('data-name')
-                #logger.info(input)
-                #logger.info(str(data_name).lower())
-                if str(data_name).lower() != input:
+    
+                if not input in str(data_name).lower():
                     continue
                 data_category = form.get('data-category')
                 data_price = form.get('data-price')
@@ -111,7 +106,7 @@ def get_cards_dealers(input,responses,logger):
 
         formatted_string = format_list(card_list,"Dealers")
         
-        responses.append(formatted_string) if formatted_string else responses.append("No hay resultados con stock En dealers")
+        responses.append(formatted_string) 
         
         return responses
     else:
@@ -137,9 +132,8 @@ def get_cards_pirulo(input,responses,logger):
 
                 
                 data_name = form.get('data-name')
-               # logger.info(input)
-                #logger.info(str(data_name).lower())
-                if str(data_name).lower() != input:
+
+                if not input in str(data_name).lower():
                     continue
                 data_category = form.get('data-category')
                 data_price = form.get('data-price')
@@ -155,7 +149,7 @@ def get_cards_pirulo(input,responses,logger):
 
         formatted_string = format_list(card_list,"Pirulo")
 
-        responses.append(formatted_string) if formatted_string else responses.append("No hay resultados con stock En pirulo")
+        responses.append(formatted_string) 
         
         return responses 
     else:
@@ -184,8 +178,10 @@ def get_cards_lair(input,responses,logger):
                 continue
             img_tag = item.find('img', class_='productCard__img')
             alt_text = img_tag['alt'] if img_tag else None
-            cleaned_text = re.sub(r'\s*\[.*?\]', '', alt_text)
-            if cleaned_text.lower() != input:
+            # cleaned_text = re.sub(r'\s*\[.*?\]', '', alt_text)
+            # if cleaned_text.lower() != input:
+            #     continue
+            if not input in str(alt_text).lower():
                 continue
             #titulo = item.find('p', class_='productCard__setName').text.strip()
             precio = item.find('p', class_='productCard__price').text.strip()
@@ -200,7 +196,7 @@ def get_cards_lair(input,responses,logger):
 
         formatted_string = format_list(card_list,store="Lair")
         
-        responses.append(formatted_string) if formatted_string else responses.append("No hay resultados con stock En lair")
+        responses.append(formatted_string) 
         
         return responses
     else:
@@ -211,7 +207,7 @@ def format_list(card_list,store=None):
     formatted_list = []
     if not card_list:
         return f"{store}:\nNo hay resultados con stock"
-    for i, card in enumerate(card_list[:6]):
+    for i, card in enumerate(card_list[:10]):
         titulo = card.get('titulo', '')
         precio = card.get('precio', '')
         link = card.get('link', '')
@@ -222,7 +218,7 @@ def format_list(card_list,store=None):
             formatted_list.append(f"{titulo}// {variante} // {precio} // {link}")    
 
 
-    extra= "\n----------------Disfrute-----------------" if len(card_list) < 6 else "\n---------Hay mas pero hay limite de caracteres-----------"   
+    extra= "\n----------------Disfrute-----------------" if len(card_list) < 10 else "\n---------Hay mas pero hay limite de caracteres-----------"   
 
     formatted_string = "\n".join(formatted_list)+f"{extra}"
     formatted_string =f"{store}:\n" + formatted_string  

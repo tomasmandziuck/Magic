@@ -31,7 +31,7 @@ async def send_message(message,user_message,username,logger):
         return
     
     try:
-        for input in user_message.split(","):
+        for input in user_message.split(";"):
             responses= get_response(input,username,command[0],logger)
             #await message.author.send(response) if is_private else await message.channel.send(response)
             for response in responses:

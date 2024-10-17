@@ -24,19 +24,21 @@ async def send_message(message,user_message,username,logger):
     is_private = user_message[0] == "?"
     is_general= user_message[0] == "!"
     user_message = user_message[1:]
+    command = user_message.split(" ")
 
     if username.lower() == bot_config.ENEMY_USER:
         await message.author.send("Se requiere autorizacion del propietario para habilitar servicio")
         return
     
     try:
-        responses= get_response(user_message,username,logger)
-        #await message.author.send(response) if is_private else await message.channel.send(response)
-        for response in responses:
-            if is_private:
-                await message.author.send(response)
-            elif is_general:
-                await message.channel.send(response)
+        for input in user_message.split(","):
+            responses= get_response(input,username,command[0],logger)
+            #await message.author.send(response) if is_private else await message.channel.send(response)
+            for response in responses:
+                if is_private:
+                    await message.author.send(response)
+                elif is_general:
+                    await message.channel.send(response)
 
 
     except Exception as ex:

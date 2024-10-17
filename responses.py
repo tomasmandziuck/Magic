@@ -5,16 +5,16 @@ import re
 from bs4 import BeautifulSoup
 
 
-def get_response(user_input,user,logger):
+def get_response(user_input,user,command,logger):
     lowered = user_input.lower()
     responses= []
     if lowered in bot_config.CUSTOM_RESPONSES:
         responses.append(bot_config.CUSTOM_RESPONSES[lowered].format(user))
         return responses
-    elif "help" in lowered:
+    elif "help" in command:
         responses.append(f"Para Buscar una carta:\n!find tucarta\nPara que la respuesta sea privada:\n?find tucarta")
         return responses
-    elif "find" in lowered:
+    elif "find" in command:
         lowered = lowered.replace("find", "").strip()
         responses.append(f"Pediste: {lowered}\n")
         responses = get_cards_pirulo(lowered,responses,logger)

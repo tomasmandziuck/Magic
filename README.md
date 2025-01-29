@@ -1,0 +1,1 @@
+Simple discord chat bot that checks for cards in the 4 main MTG stores in CABA.

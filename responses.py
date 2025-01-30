@@ -8,10 +8,7 @@ from bs4 import BeautifulSoup
 def get_response(user_input,user,command,logger):
     lowered = user_input.lower()
     responses= []
-    if lowered in bot_config.CUSTOM_RESPONSES:
-        responses.append(bot_config.CUSTOM_RESPONSES[lowered].format(user))
-        return responses
-    elif "help" in command:
+    if "help" in command:
         responses.append(f"Para Buscar una carta:\n!find tucarta\nPara que la respuesta sea privada:\n?find tucarta\nPara buscar por lista de cartas:\nSeparar nombre de cartas con ;")
         return responses
     elif "find" in command:
